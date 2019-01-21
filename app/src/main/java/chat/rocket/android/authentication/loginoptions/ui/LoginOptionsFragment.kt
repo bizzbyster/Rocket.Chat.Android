@@ -20,6 +20,7 @@ import chat.rocket.android.authentication.loginoptions.presentation.LoginOptions
 import chat.rocket.android.authentication.loginoptions.presentation.LoginOptionsView
 import chat.rocket.android.authentication.ui.AuthenticationActivity
 import chat.rocket.android.util.extensions.*
+import chat.rocket.android.util.extensions.openTabbedUrl
 import chat.rocket.android.webview.oauth.ui.INTENT_OAUTH_CREDENTIAL_SECRET
 import chat.rocket.android.webview.oauth.ui.INTENT_OAUTH_CREDENTIAL_TOKEN
 import chat.rocket.android.webview.oauth.ui.oauthWebViewIntent
@@ -199,7 +200,7 @@ class LoginOptionsFragment : Fragment(), LoginOptionsView {
         setupToolbar()
         setupAccounts()
         analyticsManager.logScreenView(ScreenViewEvent.LoginOptions)
-        deepLinkInfo?.let { presenter.authenticateWithDeepLink(it) }
+        deepLinkInfo?.let { presenter.authenticateWithDeepLink(it, state) }
     }
 
     private fun setupToolbar() {
@@ -478,23 +479,30 @@ class LoginOptionsFragment : Fragment(), LoginOptionsView {
         argument: String,
         requestCode: Int
     ) {
-        ui { activity ->
+        if (requestCode == REQUEST_CODE_FOR_OAUTH) {
             button.setOnClickListener {
-                when (requestCode) {
-                    REQUEST_CODE_FOR_OAUTH -> startActivityForResult(
-                        activity.oauthWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_OAUTH
-                    )
-                    REQUEST_CODE_FOR_CAS -> startActivityForResult(
-                        activity.ssoWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_CAS
-                    )
-                    REQUEST_CODE_FOR_SAML -> startActivityForResult(
-                        activity.ssoWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_SAML
-                    )
-                }
+                view?.openTabbedUrl(accountUrl)
+            }
+        } else {
+            ui { activity ->
+                button.setOnClickListener {
+                    when (requestCode) {
+                        REQUEST_CODE_FOR_OAUTH -> startActivityForResult(
+                                activity.oauthWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_OAUTH
+                        )
+                        REQUEST_CODE_FOR_CAS -> startActivityForResult(
+                                activity.ssoWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_CAS
+                        )
+                        REQUEST_CODE_FOR_SAML -> startActivityForResult(
+                                activity.ssoWebViewIntent(accountUrl, argument), REQUEST_CODE_FOR_SAML
+                        )
+                    }
 
-                activity.overridePendingTransition(R.anim.slide_up, R.anim.hold)
+                    activity.overridePendingTransition(R.anim.slide_up, R.anim.hold)
+                }
             }
         }
+
     }
 
     /**

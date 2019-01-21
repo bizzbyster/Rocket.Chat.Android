@@ -68,7 +68,11 @@ class AuthenticationActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     private fun loadCredentials() {
         intent.getLoginDeepLinkInfo()?.let {
-            showServerFragment(it)
+            if (it.oauthState == null) {
+                showServerFragment(it)
+            } else {
+                showLoginOptionsFragment(it)
+            }
         }.ifNull {
             val newServer = intent.getBooleanExtra(INTENT_ADD_NEW_SERVER, false)
             presenter.loadCredentials(newServer) { isAuthenticated ->
@@ -98,6 +102,20 @@ class AuthenticationActivity : AppCompatActivity(), HasSupportFragmentInjector {
             allowStateLoss = true
         ) {
             chat.rocket.android.authentication.server.ui.newInstance()
+        }
+    }
+
+    private fun showLoginOptionsFragment(deepLinkInfo: LoginDeepLinkInfo) {
+        addFragment(
+                ScreenViewEvent.LoginOptions.screenName,
+                R.id.fragment_container,
+                allowStateLoss = true
+        ) {
+            chat.rocket.android.authentication.loginoptions.ui.newInstance(
+                    serverName = deepLinkInfo.url,
+                    isNewAccountCreationEnabled = true,
+                    isLoginFormEnabled = false,
+                    deepLinkInfo = deepLinkInfo)
         }
     }
 
