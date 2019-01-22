@@ -203,6 +203,10 @@ class LoginOptionsFragment : Fragment(), LoginOptionsView {
         deepLinkInfo?.let { presenter.authenticateWithDeepLink(it, state) }
     }
 
+    public fun handleOauthResponse(deepLinkInfo: LoginDeepLinkInfo) {
+        deepLinkInfo?.let { presenter.authenticateWithDeepLink(it, state) }
+    }
+
     private fun setupToolbar() {
         with(activity as AuthenticationActivity) {
             this.clearLightStatusBar()

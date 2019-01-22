@@ -99,7 +99,11 @@ class LoginOptionsPresenter @Inject constructor(
             loginMethod = AuthenticationEvent.AuthenticationWithDeeplink
             doAuthentication(TYPE_LOGIN_DEEP_LINK)
         } else if (deepLinkInfo.credentialToken != null && deepLinkInfo.credentialSecret != null && deepLinkInfo.oauthState != null) {
-            authenticateWithOauth(deepLinkInfo.credentialToken, deepLinkInfo.credentialSecret)
+            if (isStateValid(deepLinkInfo.oauthState, state)) {
+                authenticateWithOauth(deepLinkInfo.credentialToken, deepLinkInfo.credentialSecret)
+            } else {
+                throw RocketChatAuthException("Invalid AuthenticationEvent Oauth state mismatch...")
+            }
         }
     }
 
