@@ -23,7 +23,8 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleInstance">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
