@@ -89,7 +89,7 @@ class LoginOptionsPresenter @Inject constructor(
         doAuthentication(TYPE_LOGIN_SAML)
     }
 
-    fun authenticateWithDeepLink(deepLinkInfo: LoginDeepLinkInfo) {
+    fun authenticateWithDeepLink(deepLinkInfo: LoginDeepLinkInfo, state: String?) {
         val serverUrl = deepLinkInfo.url
         setupConnectionInfo(serverUrl)
         if (deepLinkInfo.userId != null && deepLinkInfo.token != null) {
@@ -98,8 +98,18 @@ class LoginOptionsPresenter @Inject constructor(
             tokenRepository.save(serverUrl, Token(deepLinkUserId, deepLinkToken))
             loginMethod = AuthenticationEvent.AuthenticationWithDeeplink
             doAuthentication(TYPE_LOGIN_DEEP_LINK)
+        } else if (deepLinkInfo.credentialToken != null && deepLinkInfo.credentialSecret != null && deepLinkInfo.oauthState != null) {
+            if (isStateValid(deepLinkInfo.oauthState, state)) {
+                authenticateWithOauth(deepLinkInfo.credentialToken, deepLinkInfo.credentialSecret)
+            } else {
+                throw RocketChatAuthException("Invalid AuthenticationEvent Oauth state mismatch...")
+            }
         }
     }
+
+    // If the state does not match then the request was created by a third party and the process should be aborted.
+    private fun isStateValid(receivedState: String?, sentState: String?): Boolean =
+            receivedState == sentState
 
     private fun doAuthentication(loginType: Int) {
         launchUI(strategy) {
